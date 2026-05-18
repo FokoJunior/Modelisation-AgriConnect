@@ -6,75 +6,121 @@ Ce diagramme illustre les interactions des différents acteurs (Acheteur, Produc
 
 ```mermaid
 graph LR
-    %% Style pour les Acteurs (Simulés par des nœuds circulaires)
-    classDef actor fill:#e1bee7,stroke:#8e24aa,stroke-width:2px,color:#000
-    classDef usecase fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,rx:20px,ry:20px
+    classDef actor fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef uc fill:#e3f2fd,stroke:#1565c0,stroke-width:1.5px
+    classDef ucSec fill:#fff9c4,stroke:#f9a825,stroke-width:1.5px
 
-    %% Déclaration des Acteurs
+    %% ─── Acteurs ───
     Buyer((Acheteur)):::actor
     Producer((Producteur)):::actor
     Transporter((Transporteur)):::actor
     Admin((Administrateur)):::actor
 
-    %% --- Frontière du Système (Fonctionnalités) ---
-    subgraph AgriConnect System ["AgriConnect (Plateforme Mobile & Web)"]
+    subgraph Système AgriConnect
         direction TB
-        
-        %% Fonctionnalités Communes
-        UC_Auth(Création de compte & Auth Mobile)
-        UC_Wallet(Gérer son Portefeuille & Retraits)
-        
-        %% Fonctionnalités Acheteur
-        UC_Search(Rechercher & Filtrer les produits)
-        UC_Order(Acheter / Passer Commande)
-        UC_Negotiate(Négocier en P2P)
-        UC_Confirm(Confirmer la Réception)
-        
-        %% Fonctionnalités Producteur
-        UC_Publish(Créer/Publier un produit)
-        UC_Manage(Accepter/Refuser les offres)
-        UC_Prepare(Préparer la commande)
-        
-        %% Fonctionnalités Transporteur
-        UC_Deliver(Livrer la marchandise)
-        
-        %% Fonctionnalités Administrateur
-        UC_Mod(Modérer le catalogue & Utilisateurs)
-        UC_KYC(Procéder à la vérification KYC)
-        UC_Dispute(Résoudre les Litiges)
-        UC_Refund(Forcer le remboursement / Déblocage)
+
+        %% ─── Cas communs ───
+        UC1(S'authentifier):::uc
+        UC2(Gérer son portefeuille):::uc
+        UC3(Consulter les notifications):::uc
+
+        %% ─── Sous-cas communs ───
+        UC1a(Vérifier OTP):::ucSec
+        UC2a(Effectuer un retrait):::ucSec
+
+        %% ─── Acheteur ───
+        UC4(Parcourir le marché):::uc
+        UC5(Passer une commande):::uc
+        UC6(Négocier un prix):::uc
+        UC7(Payer via Mobile Money):::uc
+        UC8(Confirmer la réception):::uc
+        UC9(Suivre la commande):::uc
+        UC10(Ouvrir un litige):::ucSec
+
+        %% ─── Producteur ───
+        UC11(Publier un produit):::uc
+        UC12(Gérer ses produits):::uc
+        UC13(Répondre aux offres):::uc
+        UC14(Valider la préparation):::uc
+
+        %% ─── Transporteur ───
+        UC15(Prendre en charge une livraison):::uc
+        UC16(Marquer comme livré):::ucSec
+
+        %% ─── Administrateur ───
+        UC17(Modérer les annonces):::uc
+        UC18(Gérer les utilisateurs):::uc
+        UC19(Vérifier l'identité KYC):::uc
+        UC20(Résoudre un litige):::uc
+        UC21(Forcer un remboursement):::ucSec
     end
 
-    %% --- Assignation des classes de style ---
-    class UC_Auth,UC_Wallet,UC_Search,UC_Order,UC_Negotiate,UC_Confirm,UC_Publish,UC_Manage,UC_Prepare,UC_Deliver,UC_Mod,UC_KYC,UC_Dispute,UC_Refund usecase
+    %% ─── Relations Acheteur ───
+    Buyer --> UC1
+    Buyer --> UC2
+    Buyer --> UC3
+    Buyer --> UC4
+    Buyer --> UC5
+    Buyer --> UC6
+    Buyer --> UC8
+    Buyer --> UC9
 
-    %% --- Liens Acheteur ---
-    Buyer --> UC_Auth
-    Buyer --> UC_Wallet
-    Buyer --> UC_Search
-    Buyer --> UC_Order
-    Buyer --> UC_Negotiate
-    Buyer --> UC_Confirm
+    %% ─── Relations Producteur ───
+    Producer --> UC1
+    Producer --> UC2
+    Producer --> UC3
+    Producer --> UC11
+    Producer --> UC12
+    Producer --> UC13
+    Producer --> UC14
 
-    %% --- Liens Producteur ---
-    Producer --> UC_Auth
-    Producer --> UC_Wallet
-    Producer --> UC_Publish
-    Producer --> UC_Manage
-    Producer --> UC_Prepare
+    %% ─── Relations Transporteur ───
+    Transporter --> UC1
+    Transporter --> UC2
+    Transporter --> UC3
+    Transporter --> UC15
 
-    %% --- Liens Transporteur ---
-    Transporter --> UC_Auth
-    Transporter --> UC_Wallet
-    Transporter --> UC_Deliver
+    %% ─── Relations Administrateur ───
+    Admin --> UC17
+    Admin --> UC18
+    Admin --> UC19
+    Admin --> UC20
 
-    %% --- Liens Administrateur ---
-    Admin --> UC_Mod
-    Admin --> UC_KYC
-    Admin --> UC_Dispute
-    Admin --> UC_Refund
+    %% ─── <<include>> ───
+    UC1 -- "«include»" --> UC1a
+    UC2 -- "«include»" --> UC2a
+    UC5 -- "«include»" --> UC7
+    UC5 -- "«include»" --> UC1
+    UC11 -- "«include»" --> UC1
+    UC13 -- "«include»" --> UC1
+    UC15 -- "«include»" --> UC1
+    UC16 -- "«include»" --> UC15
+
+    %% ─── <<extend>> ───
+    UC8 -- "«extend»" --> UC10
+    UC6 -- "«extend»" --> UC5
+    UC9 -- "«extend»" --> UC5
+    UC20 -- "«extend»" --> UC21
+    UC19 -- "«extend»" --> UC18
 ```
 
+---
+
+## Relations clés expliquées
+
+### Relations `«include»`
+- **S'authentifier** inclut toujours **Vérifier OTP** (SMS obligatoire).
+- **Gérer son portefeuille** inclut **Effectuer un retrait** (sous-flux bancaire obligatoire).
+- **Passer une commande** inclut **Payer via Mobile Money** (paiement obligatoire) et **S'authentifier** (accès sécurisé requis).
+- **Publier/Répondre à des offres/Prendre en charge une livraison** incluent tous **S'authentifier**.
+- **Marquer comme livré** inclut **Prendre en charge une livraison** (pré-requis).
+
+### Relations `«extend»`
+- **Confirmer la réception** peut s'étendre vers **Ouvrir un litige** (si l'acheteur signale un problème).
+- **Négocier un prix** étend **Passer une commande** (optionnel selon le producteur).
+- **Suivre la commande** étend **Passer une commande** (fonctionnalité optionnelle de suivi).
+- **Résoudre un litige** peut s'étendre vers **Forcer un remboursement** (décision admin).
+- **Vérifier l'identité KYC** étend **Gérer les utilisateurs** (processus spécifique, non systématique).
 ---
 
 ## 2. Description des Cas d'Utilisation
